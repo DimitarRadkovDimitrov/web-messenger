@@ -1,0 +1,446 @@
+- Assignment 2  -  Message Management and Viewer
+- ---------------------------------------------
+- Due date: Friday, February 17, 2016 by midnight
+-
+- Write a message management and viewing system. It should store messages
+- along with the user's id, the date the message was posted, and the stream
+- to which the message was posted. The viewer should allow the user to
+- read the messages, sort them based on author's id and date.
+-
+-
+- 1. Posting Messages
+- -------------------
+- Write two programs, one to add users (addauthor) to the system and one
+- to allow users to post messages (post).
+-
+- post program
+- ------------
+- Write a program named post which takes a message and stores it in
+- a file based upon the message stream it is associated with. Each message
+- stream represents a topic for that collection of messages. For example, the
+- cat message stream is intended to contain posts about cats.
+-
+- The post program runs on the command line. It is executed using:
+-
+-    % ./post <author-id>
+-    stream: <stream-name>
+-    enter text: <text>
+-
+- where <author-id> is the name the user uses in the messaging system (their
+- login id), <stream-name> is a name of the stream to which they are posting,
+- and <text> are the comments they wish to post to the stream. The text before
+- the colons : are messages from the program to the user. Note that the
+- <text> field can be several lines long. The program stops reading input when
+- the user types a ctrl-d character on an empty line (there should be no text
+- on the line before the ctrl-d).
+-
+- A sample input might look like this:
+-    % ./post Fred Stone
+-      stream: cats
+-      enter text: I like cats.
+-      - They run.
+-      - They jump.
+-      - ctrl-d
+- In the above example the user entered three lines of text and ended the
+- message with a ctrl-d on an otherwise empty line. The "- " at the start
+- of the lines is a prompt written by the program to let the user know
+- they are still entering text.
+-
+- If the post is to a stream that does not exist or from an author
+- who does not have permission to post to that stream then the
+- program should print a meaningful error message.
+-
+- The post program should be written in C with classes using your class
+- converter from assignment 1. It should also use a library of functions to
+- update the files containing the posted messages and related information.
+-
+- The library to access the stream files contains the following items:
+-
+- struct userPost {
+-    char *username;
+-    char *streamname;
+-    char *date;
+-    char *text;
+- };
+-
+- updateStream(struct userPost *st);
+- addUser(char *username, char *list);
+- removeUser(char *username, char *list);
+-
+- For a posting you should allocate the structure and fill in the fields
+- read from the user's input.  The updateStream() function adds a new posting
+- to the stream specified in streamname. If the stream does not exist then
+- it creates the files necessary for the stream. You will need to determine
+- the time and date of the post, format it as a string, and store it
+- in the date string.
+-
+- The addUser() function adds a user with username to all of the streams
+- listed in the list string. The list string is a comma separated list of
+- stream names. If a stream name in the list does not exist then a new
+- stream with that name should be created. The removeUser() function
+- removes the username from the stream(s) in the list.
+-
+- Package the above functions in a library named libstream.a and create
+- an associated header file named stream.h. Use this library when you
+- compile the post and the addauthor program.
+-
+- The post program should use a class which reads the input for
+- the post and calls the library functions to store the entry.
+-
+- class PostEntry {
+-    readInput();
+-    formatEntry();
+-    getTimeDate();
+-    submitPost();
+- };
+-
+- readInput() -reads the user's input to the post program
+- formatEntry() -creates the struct used by the updateStream() function
+- getTimeDate() -determines the current time and date and formats it as a string
+- submitPost() -calls the updateStream() function
+-
+- You can use any parameters and return values for the methods
+- that you wish. You cannot make any of the variables global.
+- You can add more methods or variables to the class if needed.
+-
+-
+- addauthor program
+- -----------------
+- This program should add the author id to one or more files which list the
+- users for a stream. The program is run from the command line using:
+-
+-    % ./addauthor <author-id>
+-      list streams: <stream-list>
+-
+- where <author-id> is the user's name on this system and <stream-list> is
+- a comma separated list of streams to which the author will be added.
+-
+- The user can be removed from a stream using the same command but
+- with the -r argument added to the addauthor command.
+-
+- For example:
+-
+-    ./addauthor Fred
+-    list streams: cars
+-
+- will add Fred to the cars stream. To remove Fred from the cars
+- stream you would use:
+-
+-    ./addauthor -r Fred
+-    list streams: cars
+-
+-
+- 2. Storing Messages in Files
+- ----------------------------
+- Messages will be stored in several files. Each stream will have its
+- own set of three files.
+-
+- The messages for an individual stream will be stored in a Stream file
+- named <name>Stream where <name> is the name of the stream. For example, a
+- stream named "cars" would be stored in a file named carsStream.
+- The Stream files will contain each message, the message's author, and
+- the date it was posted. A sample file containing three posts would look
+- like this:
+-
+- Sender: Fred
+- Date: Jan. 1, 2017 8:00 PM
+- text....
+- text....
+- Sender: Wilma
+- Date: Jan. 15, 2017 12:00 PM
+- text....
+- text....
+- text....
+- Sender: Betty
+- Date: Feb. 1, 2017  1:00 PM
+- text....
+- text....
+-
+- Where text.... would be replaced by the message they posted.
+- New posts are added to the end of the file.
+-
+-
+- Associated with the Stream file is a StreamData file. This file will
+- be name similar to the previous file. For a stream on "cars" this
+- file would be named carsStreamData. This file contains the ending
+- location in bytes for each posting in the Stream file. For the
+- above sample file this would mean that the StreamData file contains
+- the ending location for each line immediately before the word "Sender".
+-
+- For example, assume the three posts in the above file
+- have the following end locations in the Stream file:
+-
+- Sender: Fred      -position 30 (meaning the first post occupies bytes 0 to 30)
+- Sender: Wilma     -position 55 (meaning the second post occupies bytes 31-55)
+- Sender: Betty     -position 99 (meaning it the third post occupies bytes 56-99)
+-
+- For the Stream file containing the above posts the StreamData file
+- would contain:
+-
+- 30
+- 55
+- 99
+-
+- When a new post is added to the Stream file the StreamData file will
+- need to be updated to include new end position.
+-
+-
+- The third file associated with a stream contains a list of user names
+- and the last post that they have read from the Stream file. For example:
+-
+- Fred    5
+- Betty   4
+- Barney  0
+- Wilma   10
+-
+- indicates that Fred has read the first five messages, Betty has read the
+- first four messages, and Wilma has read the first ten messages stored
+- in the Stream file. Barney has read 0 messages meaning he has never looked
+- at that particular stream.
+-
+- Not all user names will be included in all StreamData files.
+- Users can pick which streams they wish to read. If their name
+- does not appear in a stream file then they do not want to read
+- the posts in that stream.
+-
+- Name this file similarly to those above using <name>StreamUsers.
+- So the "cars" stream would be named carsStreamUsers.
+-
+-
+- These files will be stored in a subdirectory named messages. There should
+- be three files for each stream (e.g. carStream, carStreamData, carStreamUsers).
+-
+-
+- 3. Viewing Messages
+- -------------------
+- Write a viewing program that allows the user to read messages which
+- have been posted and stored in stream files. The output of the program
+- will be to a standard text window (80x24 characters). Write this program
+- in Python. They program is named view.py and it should be started with
+- the user's name on the command line.
+-
+- When the program starts it should display a list of groups to which the
+- user belongs. The user can then type the name of the stream they wish to start
+- reading. They can also type all and see posts for all of the groups to
+- which they subscribe. As an example, when Betty starts the viewer she would see:
+-
+-    % ./view.py Betty
+-      cars cats dogs all
+-      all
+-
+- In this case Betty selected all meaning they want to view new posts from
+- all groups to which they subscribe.
+-
+- Once the user selects a stream, or all streams, the newest posts should
+- be read from Stream files and displayed on the screen. The posts should
+- be ordered from oldest on the top to newest on the bottom of the screen.
+- As the window is only 24 rows tall you should not display more than
+- 24 lines at a time. The user can navigate through up and down through the
+- posts using keyboard commands.
+-
+- The display should start by showing the oldest unread post.
+- If the user pages down then they will see other new posts until
+- the last post has been seen. If the user pages up then they will see
+- older, previously read, posts. Once a post has been displayed
+- the StreamUsers file file should be updated to indicate that the
+- message has been read. Only update the StreamUsers file for messages
+- that have actually been displayed. If the users does not page down
+- to read a message then they have not seen it and the StreamUsers file
+- should not indicate they have read that far into the file.
+-
+- To move up a page the user can press the page-up button.
+- To move down a page they can press the page-down button.
+- Other keyboard commands allow sorting the streams, marking all
+- messages as read, and checking for new messages:
+-
+- O  Sorts the streams based on user names, initially the streams are
+-    sorted chronologically. This toggles the stream to be sorted based on
+-    the names of the posters. Pressing O again toggles back to sorting by date.
+- M  Mark all unread posts for this stream as read. If the user is currently
+-    viewing all streams then mark all streams as read. This causes the
+-    StreamUsers file to be updated.
+- C  Check for new posts. If there are new posts in the active stream(s)
+-    you should display them.
+- S  Lets the user select a new stream to read from. It should provide a list
+-    of streams for the user to choose from similar to that provided when
+-    the program first starts.
+-
+- Once a message has been displayed it should be marked as read in the
+- StreamUsers file. This means that the last post which the user has
+- read is updated in the StreamUsers file. The mark all M option will
+- update the StreamUsers file to indicate the user has read the last
+- message in the stream.
+-
+- These commands should appear in a menu on the bottom row of the screen.
+- There will be up to 23 lines of posts and the bottom line containing the
+- following menu.
+-
+- Page Up   Page Down   O-order toggle   M-mark all   S-stream  C-check for new
+-
+- The menu options are only reminders to the user. They do not open a
+- menu bar.
+-
+- To read from a stream file you will need to identify the location
+- of the last post which the user has read. You can do this by reading
+- the StreamUsers file. Once you have done this you should use seek() to
+- move to the start of the next message (if one exists), read the message,
+- and display it on the screen (up to 23 lines at a time).
+-
+- A sample view screen could look like this:
+-
+- Stream: Internet Cats
+- Sender: Wilma
+- Date: Jan 23, 2017  4:00 PM
+- cats cats
+- cats
+- ----------------------------
+- Stream: Cars
+- Sender: Betty
+- Date: Jan. 27, 2017  3:00 PM
+- cars
+- cars
+- cars
+- ----------------------------
+- Stream: Cars
+- Sender: Barney
+- Date: Jan 27, 2017   12:00 AM
+- automobiles
+- cars
+- automobiles
+- automobiles
+- automobiles
+-
+-
+- Page Up   Page Down   O-order toggle   M-mark all   S-stream  C-check for new
+-
+-
+-
+- 4. Makefile Operations
+- ----------------------
+- Your makefile should first compile your executable program from assignment 1.
+- It should then convert your post.cc into post.c using the assignment 1 program.
+- Next it should compile post.c into an executable. It should also
+- compile the addauthor program.
+-
+-
+-
+- Memory Checking
+- ------------------
+- Make sure your C programs do not have any memory leaks. You can test this
+- using valgrind.
+-
+-
+- Compiler Notes
+- --------------
+- Compile all of your code using the -g flag. This is used to include
+- debugging information and to check for memory leaks. Include the -g
+- flag in your makefile when your compile your code.
+-
+- Compile all code using the -ansi -Wall command line arguments to gcc.
+- The compiler should produce no warnings when your program is compiled.
+-
+-
+- Handin Notes
+- ------------
+- 1. This assignment will be regraded only if the marker makes a mistake.
+- This includes problems such as recording the grade incorrectly,
+- not following instructions in the readme.txt when running the program, or
+- calculating the final grade incorrectly.
+-
+- If the assignment is submitted incorrectly, if it does not compile,
+- if files are missing or incomplete, then a grade of zero will be assigned.
+-
+- 2. Submit the assignment using the dropbox for Assignment 2 in Courselink.
+-
+- 3. Include a readme.txt which contains your name, student number, and a short
+- description of any parts of the program which do not function correctly.
+- If there are some circumstances where functions don't always work correctly
+- or if they don't work at all then include this information in the readme.txt.
+- If there are special instructions which are necessary to make your C program
+- work correctly then you should include them in the readme.txt.
+- This should be a plain text file and not a .doc, .docx, or .pdf file.
+-
+- 4. Your code must compile and run on the the cis2750.socs.uoguelph.ca
+- server used for the course.  If it does not then it will receive a grade
+- of zero.
+-
+- 5. Submit your source files necessary to compile your C code, a makefile that
+- will compile the code, and any .c and .h  file necessary to build the project,
+- and a readme.txt.
+-
+- Do not submit any compiled code, it will be deleted before your program
+- is compiled.
+-
+- Name your compiled C programs post and addauthor.  The makefile should
+- compile the C programs when make is typed.
+-
+- 6. Do not use any global variables.
+-
+- 7. Format your code properly and use meaningful variable names.
+-
+- 8. All code is to be written individually. No group work is allowed.
+-    You cannot use code found on the internet for the assignment.
+-    You cannot use any tools that generate code such as lexers,
+-    compiler-compilers, parsers, or regular expression libraries
+-    for this assignment.
+-
+-
+-
+- Submitting the Assignment
+- -------------------------
+- 1. Backup your files. Either store them in a source code repository such
+-    as Git or copy them to a backup directory. If you accidentally destroy
+-    your files while trying to tar them then this will allow you to recover
+-    them. Do not use a public Git repository as other people will be able
+-    to view your code. Use a private Git repo.
+- 2. Package your .c, .h, makefile, and readme.txt in a tar file.
+-    Do not omit a2.tar in the following line or you will destroy your
+-    assignment.  The file is created using:
+-
+-        tar cf a2.tar *.h *.c *.cc makefile readme.txt
+-
+- 3. You can check the contents in the tar archive using:
+-
+-    tar tf a2.tar
+-
+-    If the tar file does not contain all of the files necessary to build
+-    your assignment and the readme.txt then rebuild the archive.
+-
+- 4. Testing your submission:
+-    -make a directory named testing
+-    -copy the a2.tar file into the testing directory
+-    -change into the testing directory
+-    -in the testing directory unpack the tar file using
+-       tar xvf a2.tar
+-    -type make
+-    At this point the executables should be in the current directory.
+-    If it is not then determine why the program didn't compile properly
+-    and recreate the tar file.
+-
+- 5. Once you have a tar file that will unpack properly and you can build
+-    the executable by typing make you can then submit the a2.tar file
+-    to the CIS*2750 dropbox on courselink.
+-
+- Follow the above steps to compile the C code.
+- If you do not then you cannot be sure that your assignment can be marked.
+- If any of the above steps fail then the assignment wont be marked and you
+- will receive a substantial loss of marks.
+-
+-
+- Marking the Assignment
+- ----------------------
+- The following steps will be followed to compile your C program:
+-
+-     The file you submit will be copied into a marking directory.
+-     The marker will cd into that directory.
+-     The submission file will be unpacked using tar xvf a2.tar.
+-     The marker will not cd to another subdirectory.
+-     The marker will type make.
+-     At this point there should be two programs name post and addauthor
+-        in the current directory.
+-
+-
+- If there is no makefile in the directory,  the assignment does not compile,
+- or the compiled programs are not named post and addauthor, or if the code
+- is in a subdirectory, then the assignment will receive a substantial loss
+- of marks.
