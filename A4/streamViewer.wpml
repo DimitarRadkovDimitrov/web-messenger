@@ -1,0 +1,13 @@
+.t(text="<center>")
+.h(text="Stream Viewer", size=1)
+.t(text="<style> form {display:inline-block}")
+.t(text="textarea { overflow-y:scroll; font-size: 16px; } </style>")
+.a(name="textArea", rows="20", cols="75", form="post")
+.b(name="Change Author", link="index.php")
+.b(name="Add/Remove Author", link="addauthor.php")
+.n(link="post.php", label="", input="hidden", name="userName", value="dimitar",
+label="", input="hidden", name="stream", value="all",
+label="", input="hidden", name="index", value="3",
+label="", input="hidden", name="byName", value="",
+label="", input="Submit", name="post", value="Post")
+.V()
