@@ -1,0 +1,5 @@
+.t(text="<center>")
+.h(text="Authorized Streams", size=1)
+.n(link="streamViewer.php", label="", input="hidden", name="userName", value="dim", required, ><br , label="march madness", input="radio", name="stream", value="march madness" , label="new", input="radio", name="stream", value="new", label="all", input="radio", name="stream", value="all", label="", input="Submit", name="submit", value="View")
+.t(text="</center>")
+.S()

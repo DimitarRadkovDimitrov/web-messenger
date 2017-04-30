@@ -1,0 +1,10 @@
+.t(text="<center>")
+.t(text="<style> form {display:inline-block} </style>")
+.h(text="Add/Remove Author From Stream", size=1)
+.n(link="addauthor.php",
+    label="User Name: ", input="text", name="userName", value="", required, ><br,
+    label="Stream: ", input="text", name="streamName", value="",
+    label="", input="Submit", name="remove", value="Remove",
+    label="", input="Submit", name="add", value="Add")
+.t(text="</center>")
+.A()

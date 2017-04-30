@@ -1,0 +1,324 @@
+- Assignment 3  - Interface Description Language
+- ----------------------------------------------
+- Due date: Friday, March 10, 2017 by midnight
+- 
+- Build a system which reads a configuration file and dynamically creates
+- a web page from the description.  Write a C program that reads the description
+- of interface from a text file and outputs the html, css, php necessary to
+- build the interface.
+- 
+- You will attach your messaging system from assignment 2 to this system.
+- 
+- 
+- 1. Configuration File
+- ---------------------
+- The configuration file will be read by a C program which outputs
+- the web page described by the file. The C program will be called from
+- a php file.
+- 
+- The configuration file contains lists of interface elements such as buttons,
+- hyperlinks, text, input fields. The interface is described as a hierarchy
+- with the top level labelled with the dot . and levels below it
+- containing a interface elements separated buy more dot . characters.
+- 
+- For example, the following configuration file would create an interface
+- with a single heading which says Description.
+- 
+- .h(text="Description")
+- 
+- If you want to print text below the description it could look like this:
+- 
+- .h(text="Description").t(text="This is the text...")
+- 
+- This will print the text between the quotes below the heading.
+- It could also look like this:
+- 
+- .h(text="Description").t(file="./textfile")
+- 
+- In this case ./textfile is a file containing the text to read and print
+- to the screen.
+- 
+- Multiple tags can be included for each element. The heading size
+- could be indicated using:
+- 
+- .h(text="Description",size=5).t(text="This is the text...")
+- 
+- In this case the default text size for the heading is overridden
+- and the size is set to 5 (or H5).
+-  
+- The input file is read from top to bottom. When a line is completed
+- then the next line is read and interpreted. Tags from the previous
+- line end when a new line is interpreted.
+- 
+- 
+- 2. List of Interface Element Tags
+- ---------------------------------
+- These are the elements which can appear in the configuration file. Default
+- values should be used if the user does not use the tag. Any text which is
+- not in this list should be copied verbatim into the opening HTML tag.
+- 
+- . Root Directory and separator for directory levels.
+- 
+- b Button - clickable button.
+- 	name="<name>"  -string containing an identifier for the button
+- 	link="<page>"  -string containing the page linked to the button
+-   You can use css for buttons if you wish.
+- 
+- d Draw a horizontal line. There are no arguments to this tag.
+- 
+- e Executable -runs a program on the server.
+- 	exe="<filename>"  -executes the program <filename> on the server
+-   Found in the directory containing the web page, or in the ./bin directory,
+-   or in the system bin directory. Search for the <filename> executable in
+-   that order.
+- 
+- h Heading - can contain two arguments:
+- 	size=<1-6>  -indicates the heading size, optional, default is 3
+- 	text="..."  -indicates the text to print in the heading
+- 			The default text is "HEADING". 
+- 
+- i Input - allow the user to submit one or more text fields.
+- 	Use a form to create the text input. Arguments to the tag are:
+- 	 action="<filename>" -indicates the page which processes the buttons.
+- 	 text="..." -the label which is printed before the field
+- 	 name="<name>"  -name which the text field will be associated with
+- 	 value="<value>"  -indicates the default value for a field
+- 	Create a submit button at the end of the form.
+- 	The text/name/value fields must appear as sets of three. For each
+- 	input field the three fields must be listed in order. For example, to
+- 	create a single input field could look like this:
+- 		i(action="phone.php",text="Phone Number",name="number",
+- 		  value="123-456-7890")
+- 	This would create an input field labeled "Phone Number" which
+- 	contains the default value "123-456-7890". When the submit button
+- 	is pressed the page phone.php will be called on the server with
+- 	number set equal to the phone number.
+- 	Use post to send the data.
+- 
+- l Link - to a web page.
+- 	text="..."  -the text between the quotes is printed as the link
+- 			The default text is "link".
+- 	link="<url>"  -contains the URL to which the link leads 
+- 
+- p Picture - Insert an image into the page.
+- 	image="..."  -contains the image name 
+- 	size=<width>x<height>  -indicates the width and height of the image
+- 		Default height and width are 100.
+- 
+- r Radio Button -provide a list of options, the user can select one
+- 	Use a form to create a set of radio buttons.
+- 	 action="<filename>" -indicates the page which processes the buttons.
+- 	 name="<name>"  -name which the result will be associated with
+- 	 value="<value>"  -indicates the value for a button, there can be
+- 		more than one value tag, for example the following could
+- 		pick between red, green, and blue:
+- 		r(action="radio.php",name="colour",value="red",value="green",value="blue")
+- 	Make the first button the default value.
+- 	Use post to send the data.
+- 
+- t Text - Adds text to the screen. It has two arguments which indicate
+- 	where the text is located. Only one argument is used per t tag.
+- 	 file="<filename>"  -the text is in the file named <filename>
+- 	 text="..."  -the text is the string between the quotes
+- 			The default text is "Default text".
+- 	Note that the text itself from either the file or string
+- 	can contain HTML tags.
+- 
+- 
+- Name the web page mark up files with a .wpml suffix.
+- 
+- 
+- 3. Converting Message Programs to a Web Interface
+- -------------------------------------------------
+- Modify the programs from assignment 2 to run using the web
+- interfaces.  These will become interface elements and can be
+- listed in the configuration file. Use the interface building
+- system described above.
+- 
+- The user will need to enter an their user id at the start of the
+- session. The session should start when the user goes to the index.php
+- page. If they return to the index.php page they can login as a
+- different user. The index.php file should execute your C program
+- which interprets the configuration files, builds the pages, and
+- sends them to the browser. You will need multiple configuration
+- files, one for each page.
+- 
+- They should be able to choose the stream they wish to view through a
+- web page which lists the options.
+- 
+- When a post is displayed in the browser it should be marked as read
+- by that user in the appropriate StreamData file.
+- 
+- The options which were previously listed on the bottom of the view
+- window (sorting, mark all read, check for new posts, select a new stream)
+- should appear as buttons on the top of the page. You will need an additional
+- buttons to:
+- 	-change author
+- 	-add or remove an author
+- 	-post a new message to the current stream
+- These options will require separate pages to enter the new information.
+- There should also be a next and previous button on the view page to
+- move forward and back one posting.
+- 
+- You will need to maintain state information in the browser. This includes
+- the user's id, the current stream being viewed, and the current message
+- being viewed. Don't use cookies to do save this information.
+- 
+- You will need to modify your programs from assignment 2 to work
+- with web interface instead of the command line interface.
+- Add tags to the configuration file which represent your programs
+- from assignment 1. The tags should be similar in format to those
+- described in section 2 above.
+- 
+- 
+- 
+- 4. Makefile Operations
+- ---------------------
+- Your makefile should first compile your executable program from assignment 1.
+- It should then convert your post.cc into post.c using the assignment 1 program.
+- Next it should compile post.c into an executable. It should also
+- compile the addauthor program.
+- 
+- 
+- Web Server Access
+- -----------------
+- The web server is 2750web.socs.uoguelph.ca. You can access the machine
+- by using:
+-       ssh username@2750web.socs.uoguelph.ca
+- Use your SOCS username and password. If you are not on campus then you
+- will need ssh to portkey first as described in the ssh instructions
+- for Connecting to the server using ssh (described on Courselink).
+- 
+- The web pages should be stored in /srv/www/username. 
+- You can access this page using a web browser and the URL:
+-       https://2750web.socs.uoguelph.ca/username
+- You can specify filename after the the username in order to access
+- a specific file. For example:
+-       https://2750web.socs.uoguelph.ca/username/a3.php
+- 
+- The web server will look in the directory for a file named index.html
+- in the username directory if a filename is not specified.
+- 
+- All of your files will be stored and tested in a /srv/www directory.
+- They will not be in the directory with your username.  Do not hard code
+- the paths to your /srv/www/username directory in your web pages or they
+- will not work when tested. Always use a relative path to where the program
+- is being executed. If your interface works correctly only in your directory
+- then it is broken and cannot be marked.
+- 
+- 
+- Compiler Notes
+- -------------
+- Compile all of your code using the -g flag. This is used to include
+- debugging information and to check for memory leaks. Include the -g
+- flag in your makefile when your compile your code.
+- 
+- Compile all code using the -ansi -Wall command line arguments to gcc.
+- The compiler should produce no warnings when your program is compiled.
+- 
+- 
+- Handin Notes
+- -----------
+- 1. This assignment will be regraded only if the marker makes a mistake.
+- This includes problems such as recording the grade incorrectly,
+- not following instructions in the readme.txt when running the program, or
+- calculating the final grade incorrectly.
+- 
+- If the assignment is submitted incorrectly, if it does not compile,
+- if files are missing or incomplete, then a grade of zero will be assigned.
+- 
+- 2. Submit the assignment using the dropbox for Assignment 3 in Courselink.
+- 
+- 3. Include a readme.txt which contains your name, student number, and a short
+- description of any parts of the program which do not function correctly.
+- If there are some circumstances where functions don't always work correctly
+- or if they don't work at all then include this information in the readme.txt.
+- If there are special instructions which are necessary to make your C program
+- work correctly then you should include them in the readme.txt.
+- This should be a plain text file and not a .doc, .docx, or .pdf file.
+- 
+- 4. Your code must compile and run on the the 2750web.socs.uoguelph.ca
+- server used for the course.  If it does not then it will receive a grade
+- of zero.
+- 
+- 5. Submit your source files necessary to compile your C code, a makefile that
+- will compile the code, and any .c and .h  file necessary to build the project,
+- any .html or .php and any other web pages necessary to run the program,
+- and a readme.txt.
+- 
+- Do not submit any compiled code, it will be deleted before your program
+- is compiled.
+- 
+- 6. Do not use any global variables.
+- 
+- 7. Format your code properly and use meaningful variable names.
+- 
+- 8. All code is to be written individually. No group work is allowed.
+-    You cannot use code found on the internet for the assignment.
+-    You cannot use any tools that generate code such as lexers,
+-    compiler-compilers, parsers, regular expression libraries
+-    or interface builders for this assignment.
+-  
+-  
+- 
+- Submitting the Assignment
+- ------------------------
+- 1. Backup your files. Either store them in a source code repository such
+-    as Git or copy them to a backup directory. If you accidentally destroy
+-    your files while trying to tar them then this will allow you to recover
+-    them. Do not use a public Git repository as other people will be able
+-    to view your code. Use a private Git repo.
+- 2. Package your .c, .h, .cc, .html, .php, makefile, Python and readme.txt in a tar
+-    file.  Do not omit a3.tar in the following line or you will destroy your
+-    assignment.  The file is created using:
+- 
+-        tar cf a3.tar *.h *.c *.cc *.html *.php *.py makefile readme.txt
+- 
+- 3. You can check the contents in the tar archive using:
+- 
+-    tar tf a3.tar
+- 
+-    If the tar file does not contain all of the files necessary to build
+-    your assignment and the readme.txt then rebuild the archive.
+- 
+- 4. Testing your submission:
+-    -make a directory named testing
+-    -copy the a3.tar file into the testing directory
+-    -change into the testing directory
+-    -in the testing directory unpack the tar file using
+-       tar xvf a3.tar
+-    -type make
+-    At this point the executables should be in the current directory.
+-    If it is not then determine why the program didn't compile properly
+-    and recreate the tar file.
+- 
+- 5. Once you have a tar file that will unpack properly and you can build
+-    the executable by typing make you can then submit the a3.tar file
+-    to the CIS*2750 dropbox on courselink.
+- 
+- Follow the above steps to compile the C code.
+- If you do not then you cannot be sure that your assignment can be marked.
+- If any of the above steps fail then the assignment wont be marked and you
+- will receive a substantial loss of marks.
+- 
+- 
+- Marking the Assignment
+- ---------------------
+- The following steps will be followed to compile your C program:
+- 
+-     The file you submit will be copied into a marking directory.
+-     The marker will cd into that directory.
+-     The submission file will be unpacked using tar xvf a3.tar.
+-     The marker will not cd to another subdirectory.
+-     The marker will type make.
+-     At this point there should be two programs name post and addauthor
+-        in the current directory.
+- 
+- 
+- If there is no makefile in the directory,  the assignment does not compile,
+- or the compiled programs are not named post and addauthor, or if the code
+- is in a subdirectory, then the assignment will receive a substantial loss
+- of marks.
+- 
+
+

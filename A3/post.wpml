@@ -1,0 +1,5 @@
+.t(text="<center>")
+.h(text="Post to this Stream", size=1)
+.d()
+.a(name="textArea", form="postForm", rows="15", cols="50", required)
+.P()

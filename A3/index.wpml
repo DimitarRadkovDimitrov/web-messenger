@@ -1,0 +1,9 @@
+.t(text="<center>")
+.h(text="Welcome to Messenger", size=1)
+.h(text="Created by: Dimitar Dimitrov 0922289", size=3)
+.t(text="<style> form { display: inline-block } </style>")
+.n(link="streamList.php",
+    label="User Name: ", input="text", name="userName", value="", req=T,
+    label="", input="Submit", name="submit", value="Log In", req=T)
+.b(link="addauthor.php", name="Register")
+.t(text="</center>")
