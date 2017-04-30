@@ -5,3 +5,5 @@ The goal after four assignments was to create a simple messaging system (much li
 using a web interface while integrating multiple languages and functionalities.
 
 Languages used: C++, C, Python, PHP, HTML/CSS
+
+NOTE: A2 & A3 need a "messages" folder to be manually created in order to run correctly.
